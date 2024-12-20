@@ -1,18 +1,9 @@
 import sqlite3
 from datetime import datetime, timedelta
-<<<<<<< HEAD
-from openai import OpenAI
+from google import genai
 import os
 
 DB_PATH = os.getenv("COMMIT_DB_PATH", "./database/commits.db")
-=======
-import google.generativeai as genai
-import os
-
-DB_PATH = os.getenv("COMMIT_DB_PATH", "./database/commits.db")
-# Configure Gemini API
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
->>>>>>> Snippet
 
 
 # Step 1: Get commits for the current week
@@ -33,7 +24,7 @@ def get_commits_for_current_week(db_path):
 
     cursor.execute(
         """
-        SELECT datetime(timestamp, 'unixepoch'), author_name, commit_message
+        SELECT datetime(timestamp, 'unixepoch'), repo_name, commit_message, added_lines
         FROM commits
         WHERE timestamp >= ? AND timestamp <= ?
         ORDER BY timestamp ASC
@@ -52,8 +43,9 @@ def format_commits(commits):
         return "No commits were made this week."
 
     formatted = ["Commits for the current week:\n"]
-    for timestamp, author, message in commits:
-        formatted.append(f"- [{timestamp}] {author}: {message}")
+    for timestamp, message, repo_name, added_lines in commits:
+        repo = repo_name.split("/")[1] if "/" in repo_name else repo_name
+        formatted.append(f"- [{timestamp}] {repo}: {message}, add lines: {added_lines}")
     return "\n".join(formatted)
 
 
@@ -63,16 +55,20 @@ def summarize_commits_with_gemini(commit_summary):
         return "No commits were made this week."
 
     # Create Gemini model instance
-    model = genai.GenerativeModel("gemini-pro")
+    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
     prompt = f"""
-    Below is the list of Git commits made this week. Summarize the work done during the week in a concise and professional manner:
-    
+    Below is the list of Git commits made this week. Summarize the work done by repo during the week:
     {commit_summary}
+    Use Chinese return format markdown as below, percentage is calculated based on the number of addedlines, remove username in repo_name:
+    - repo_name: works [percentage]
+    - repo_name: works [percentage]
     """
 
     # Generate response
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model="gemini-2.0-flash-exp", contents=prompt
+    )
     return response.text
 
 
@@ -85,7 +81,7 @@ def main():
     print("Formatted Commits:\n", commit_summary)
 
     # Get the summary from OpenAI
-    summary = summarize_commits_with_openai(commit_summary)
+    summary = summarize_commits_with_gemini(commit_summary)
     print("\nWeekly Summary:\n", summary)
 
 
