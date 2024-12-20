@@ -5,6 +5,12 @@ DB_PATH = os.getenv("COMMIT_DB_PATH", "./database/commits.db")
 
 
 def create_db():
+    # Backup existing database if it exists
+    if os.path.exists(DB_PATH):
+        backup_path = DB_PATH.replace(".db", "_backup.db")
+        os.rename(DB_PATH, backup_path)
+        print(f"Existing database backed up to: {backup_path}")
+
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
@@ -16,6 +22,8 @@ def create_db():
     CREATE TABLE IF NOT EXISTS project_readme (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         readme_content TEXT NOT NULL,
+        repo_name TEXT NOT NULL,
+        current_branch TEXT NOT NULL,
         timestamp TEXT NOT NULL
     )
     """)
@@ -28,6 +36,9 @@ def create_db():
         author_name TEXT NOT NULL,
         author_email TEXT NOT NULL,
         commit_message TEXT NOT NULL,
+        repo_url TEXT NOT NULL,
+        repo_name TEXT NOT NULL,
+        current_branch TEXT NOT NULL,
         code_diff TEXT,
         readme_id INTEGER,
         FOREIGN KEY (readme_id) REFERENCES project_readme (id) ON DELETE CASCADE
