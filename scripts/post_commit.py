@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-
 import os
 import sqlite3
 import subprocess
+
+
+DB_PATH = os.getenv("COMMIT_DB_PATH", "./database/commits.db")
+# Configure Gemini API
 
 DB_PATH = os.getenv("COMMIT_DB_PATH", "./database/commits.db")
 

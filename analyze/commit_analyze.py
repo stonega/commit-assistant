@@ -1,9 +1,18 @@
 import sqlite3
 from datetime import datetime, timedelta
+<<<<<<< HEAD
 from openai import OpenAI
 import os
 
 DB_PATH = os.getenv("COMMIT_DB_PATH", "./database/commits.db")
+=======
+import google.generativeai as genai
+import os
+
+DB_PATH = os.getenv("COMMIT_DB_PATH", "./database/commits.db")
+# Configure Gemini API
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+>>>>>>> Snippet
 
 
 # Step 1: Get commits for the current week
@@ -48,13 +57,13 @@ def format_commits(commits):
     return "\n".join(formatted)
 
 
-# Step 3: Summarize commits using OpenAI
-def summarize_commits_with_openai(commit_summary):
+# Step 3: Summarize commits using Gemini
+def summarize_commits_with_gemini(commit_summary):
     if not commit_summary:
         return "No commits were made this week."
-    client = OpenAI(
-        api_key=os.getenv("OPENAI_API_KEY"), base_url="https://aihubmix.com"
-    )
+
+    # Create Gemini model instance
+    model = genai.GenerativeModel("gemini-pro")
 
     prompt = f"""
     Below is the list of Git commits made this week. Summarize the work done during the week in a concise and professional manner:
@@ -62,16 +71,9 @@ def summarize_commits_with_openai(commit_summary):
     {commit_summary}
     """
 
-    response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt},
-        ],
-        max_tokens=300,
-    )
-
-    return response.choices[0].message.content
+    # Generate response
+    response = model.generate_content(prompt)
+    return response.text
 
 
 # Step 4: Main script

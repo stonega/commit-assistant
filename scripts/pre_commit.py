@@ -59,10 +59,20 @@ def get_commit_info():
 def get_code_diff():
     """
     Get the code diff of the committed changes, limited to 1000 lines.
+    Returns tuple of (diff_content, total_lines, added_lines, removed_lines)
     """
     diff = subprocess.check_output(
         ["git", "diff", "--cached"], universal_newlines=True
     ).strip()
+
+    # Calculate added and removed lines
+    added_lines = 0
+    removed_lines = 0
+    for line in diff.splitlines():
+        if line.startswith("+") and not line.startswith("+++"):
+            added_lines += 1
+        elif line.startswith("-") and not line.startswith("---"):
+            removed_lines += 1
 
     # Split into lines and limit to 1000 lines
     diff_lines = diff.splitlines()[:1000]
@@ -70,7 +80,7 @@ def get_code_diff():
     if len(diff_lines) == 1000:
         diff_lines.append("\n... (diff truncated at 1000 lines)")
 
-    return "\n".join(diff_lines)
+    return ("\n".join(diff_lines), added_lines, removed_lines)
 
 
 def save_to_database(
@@ -82,7 +92,8 @@ def save_to_database(
     repo_name,
     current_branch,
     code_diff=None,
-    readme_id=None,
+    added_lines=0,
+    removed_lines=0,
 ):
     """
     Save the commit information and code diff to the SQLite database.
@@ -95,9 +106,9 @@ def save_to_database(
         """
                 INSERT INTO commits (
                     timestamp, author_name, author_email, commit_message, 
-                    repo_url, repo_name, branch_name, code_diff, readme_id
+                    repo_url, repo_name, branch_name, code_diff, added_lines, removed_lines
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
         (
             timestamp,
@@ -108,74 +119,13 @@ def save_to_database(
             repo_name,
             current_branch,
             code_diff,
-            readme_id,
+            added_lines,
+            removed_lines,
         ),
     )
 
     conn.commit()
     conn.close()
-
-
-def save_readme_to_database(repo_name):
-    """
-    Save README file to the database and get its ID.
-    Returns the ID of the inserted readme record or None if README doesn't exist.
-    """
-    readme_paths = ["README.md", "README", "readme.md", "readme"]
-    readme_content = None
-
-    # Try to find and read the README file
-    for path in readme_paths:
-        if os.path.exists(path):
-            with open(path, "r", encoding="utf-8") as f:
-                readme_content = f.read()
-            break
-
-    if not readme_content:
-        return None
-
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    # Save to database
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-
-    # Check if record exists for this repo and branch
-    cursor.execute(
-        """
-        SELECT id FROM project_readme 
-        WHERE repo_name = ?
-        """,
-        (repo_name,),
-    )
-    existing_record = cursor.fetchone()
-
-    if existing_record:
-        # Update existing record
-        cursor.execute(
-            """
-            UPDATE project_readme 
-            SET readme_content = ?, timestamp = ?
-            WHERE repo_name = ?
-            """,
-            (readme_content, timestamp, repo_name),
-        )
-        readme_id = existing_record[0]
-    else:
-        # Insert new record
-        cursor.execute(
-            """
-            INSERT INTO project_readme (readme_content, repo_name, timestamp)
-            VALUES (?, ?, ?)
-            """,
-            (readme_content, repo_name, timestamp),
-        )
-        readme_id = cursor.lastrowid
-
-    conn.commit()
-    conn.close()
-
-    return readme_id
 
 
 def main():
@@ -195,11 +145,8 @@ def main():
         current_branch,
     ) = get_commit_info()
 
-    code_diff = get_code_diff()
+    (code_diff, added_lines, removed_lines) = get_code_diff()
     print("Code diff captured.")
-
-    # Save README file to the database and get its ID
-    readme_id = save_readme_to_database(repo_name)
 
     # Save commit info and code diff to the database
     save_to_database(
@@ -211,7 +158,8 @@ def main():
         repo_name,
         current_branch,
         code_diff,
-        readme_id,
+        added_lines,
+        removed_lines,
     )
 
     print(f"Commit saved to database at {DB_PATH}")

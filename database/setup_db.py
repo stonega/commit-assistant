@@ -14,20 +14,7 @@ def create_db():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
-    # Enable foreign key constraints
-    cursor.execute("PRAGMA foreign_keys = ON;")
-
-    # Create the project_readme table
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS project_readme (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        readme_content TEXT NOT NULL,
-        repo_name TEXT NOT NULL,
-        timestamp TEXT NOT NULL
-    )
-    """)
-
-    # Create the commits table with a foreign key to project_readme
+    # Create the commits table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS commits (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,8 +26,8 @@ def create_db():
         repo_name TEXT NOT NULL,
         branch_name TEXT NOT NULL,
         code_diff TEXT,
-        readme_id INTEGER,
-        FOREIGN KEY (readme_id) REFERENCES project_readme (id) ON DELETE CASCADE
+        added_lines INTEGER DEFAULT 0,
+        removed_lines INTEGER DEFAULT 0
     )
     """)
 
