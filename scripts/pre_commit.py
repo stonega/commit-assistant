@@ -145,7 +145,7 @@ def save_readme_to_database():
     cursor.execute(
         """
         SELECT id FROM project_readme 
-        WHERE repo_name = ? AND current_branch = ?
+        WHERE repo_name = ? AND branch_name = ?
         """,
         (repo_name, current_branch),
     )
@@ -157,7 +157,7 @@ def save_readme_to_database():
             """
             UPDATE project_readme 
             SET readme_content = ?, timestamp = ?
-            WHERE repo_name = ? AND current_branch = ?
+            WHERE repo_name = ? AND branch_name = ?
             """,
             (readme_content, timestamp, repo_name, current_branch),
         )
@@ -166,7 +166,7 @@ def save_readme_to_database():
         # Insert new record
         cursor.execute(
             """
-            INSERT INTO project_readme (readme_content, repo_name, current_branch, timestamp)
+            INSERT INTO project_readme (readme_content, repo_name, branch_name, timestamp)
             VALUES (?, ?, ?, ?)
             """,
             (readme_content, repo_name, current_branch, timestamp),

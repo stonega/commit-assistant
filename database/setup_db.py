@@ -23,7 +23,7 @@ def create_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         readme_content TEXT NOT NULL,
         repo_name TEXT NOT NULL,
-        current_branch TEXT NOT NULL,
+        branch_name TEXT NOT NULL,
         timestamp TEXT NOT NULL
     )
     """)
@@ -38,7 +38,7 @@ def create_db():
         commit_message TEXT NOT NULL,
         repo_url TEXT NOT NULL,
         repo_name TEXT NOT NULL,
-        current_branch TEXT NOT NULL,
+        branch_name TEXT NOT NULL,
         code_diff TEXT,
         readme_id INTEGER,
         FOREIGN KEY (readme_id) REFERENCES project_readme (id) ON DELETE CASCADE
