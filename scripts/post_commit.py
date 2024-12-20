@@ -3,7 +3,6 @@
 import os
 import sqlite3
 import subprocess
-from datetime import datetime
 
 DB_PATH = os.getenv("COMMIT_DB_PATH", "./database/commits.db")
 
