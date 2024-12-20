@@ -116,7 +116,7 @@ def save_to_database(
     conn.close()
 
 
-def save_readme_to_database():
+def save_readme_to_database(repo_name, current_branch):
     """
     Save README file to the database and get its ID.
     Returns the ID of the inserted readme record or None if README doesn't exist.
@@ -134,14 +134,6 @@ def save_readme_to_database():
     if not readme_content:
         return None
 
-    # Get repository information
-    repo_url = subprocess.check_output(
-        ["git", "config", "--get", "remote.origin.url"], universal_newlines=True
-    ).strip()
-    repo_name = repo_url.split("/")[-1].replace(".git", "")
-    current_branch = subprocess.check_output(
-        ["git", "rev-parse", "--abbrev-ref", "HEAD"], universal_newlines=True
-    ).strip()
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # Save to database
@@ -207,7 +199,7 @@ def main():
     print("Code diff captured.")
 
     # Save README file to the database and get its ID
-    readme_id = save_readme_to_database()
+    readme_id = save_readme_to_database(repo_name, current_branch)
 
     # Save commit info and code diff to the database
     save_to_database(
