@@ -116,7 +116,7 @@ def save_to_database(
     conn.close()
 
 
-def save_readme_to_database(repo_name, current_branch):
+def save_readme_to_database(repo_name):
     """
     Save README file to the database and get its ID.
     Returns the ID of the inserted readme record or None if README doesn't exist.
@@ -144,9 +144,9 @@ def save_readme_to_database(repo_name, current_branch):
     cursor.execute(
         """
         SELECT id FROM project_readme 
-        WHERE repo_name = ? AND branch_name = ?
+        WHERE repo_name = ?
         """,
-        (repo_name, current_branch),
+        (repo_name,),
     )
     existing_record = cursor.fetchone()
 
@@ -156,19 +156,19 @@ def save_readme_to_database(repo_name, current_branch):
             """
             UPDATE project_readme 
             SET readme_content = ?, timestamp = ?
-            WHERE repo_name = ? AND branch_name = ?
+            WHERE repo_name = ?
             """,
-            (readme_content, timestamp, repo_name, current_branch),
+            (readme_content, timestamp, repo_name),
         )
         readme_id = existing_record[0]
     else:
         # Insert new record
         cursor.execute(
             """
-            INSERT INTO project_readme (readme_content, repo_name, branch_name, timestamp)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO project_readme (readme_content, repo_name, timestamp)
+            VALUES (?, ?, ?)
             """,
-            (readme_content, repo_name, current_branch, timestamp),
+            (readme_content, repo_name, timestamp),
         )
         readme_id = cursor.lastrowid
 
@@ -199,7 +199,7 @@ def main():
     print("Code diff captured.")
 
     # Save README file to the database and get its ID
-    readme_id = save_readme_to_database(repo_name, current_branch)
+    readme_id = save_readme_to_database(repo_name)
 
     # Save commit info and code diff to the database
     save_to_database(

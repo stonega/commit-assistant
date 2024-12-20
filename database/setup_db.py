@@ -23,7 +23,6 @@ def create_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         readme_content TEXT NOT NULL,
         repo_name TEXT NOT NULL,
-        branch_name TEXT NOT NULL,
         timestamp TEXT NOT NULL
     )
     """)
