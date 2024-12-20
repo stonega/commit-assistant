@@ -134,7 +134,7 @@ def main():
         commit_message, author_name, author_email, timestamp, code_diff, readme_id
     )
 
-    print(f"Commit information and README (if exists) saved to {DB_PATH}")
+    print(f"Commit {commit_message} and README (if exists) saved to {DB_PATH}")
 
 
 if __name__ == "__main__":
