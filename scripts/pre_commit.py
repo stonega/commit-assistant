@@ -217,4 +217,9 @@ def main():
         code_diff,
         readme_id,
     )
+
+    print(f"Commit {commit_message} saved to database at {DB_PATH}")
+
+
+if __name__ == "__main__":
     main()
