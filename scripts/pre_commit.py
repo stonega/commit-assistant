@@ -12,9 +12,9 @@ def get_commit_info():
     """
     Get commit message, author name, and email from the current commit being made.
     """
-    # Get the commit message from the COMMIT_EDITMSG file
+    # Get the absolute path of the git directory and commit message file
     git_dir = subprocess.check_output(
-        ["git", "rev-parse", "--git-dir"], universal_newlines=True
+        ["git", "rev-parse", "--absolute-git-dir"], universal_newlines=True
     ).strip()
     commit_msg_file = os.path.join(git_dir, "COMMIT_EDITMSG")
 
