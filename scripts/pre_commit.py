@@ -25,7 +25,21 @@ def get_commit_info():
     repo_url = subprocess.check_output(
         ["git", "config", "--get", "remote.origin.url"], universal_newlines=True
     ).strip()
-    repo_name = repo_url.split("/")[-1].replace(".git", "")
+
+    # Extract org/username and repo name from URL
+    if ":" in repo_url:  # SSH format: git@github.com:org/repo.git
+        path_part = repo_url.split(":")[-1]
+    else:  # HTTPS format: https://github.com/org/repo.git
+        path_part = repo_url.split("//")[-1].split("/", 1)[-1]
+
+    # Remove .git and split into org/repo
+    path_parts = path_part.replace(".git", "").split("/")
+    if len(path_parts) >= 2:
+        org_or_user = path_parts[-2]
+        repo_name = f"{org_or_user}/{path_parts[-1]}"
+    else:
+        repo_name = path_parts[-1]
+
     current_branch = subprocess.check_output(
         ["git", "rev-parse", "--abbrev-ref", "HEAD"], universal_newlines=True
     ).strip()
