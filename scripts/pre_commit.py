@@ -13,19 +13,6 @@ def get_commit_info():
     Get commit message, author name, email, and repository information from the current commit being made.
     """
 
-    # Get the absolute path of the git directory and commit message file
-    git_dir = subprocess.check_output(
-        ["git", "rev-parse", "--absolute-git-dir"], universal_newlines=True
-    ).strip()
-    commit_msg_file = os.path.join(git_dir, "COMMIT_EDITMSG")
-
-    if not os.path.exists(commit_msg_file):
-        print("No commit message found. Skipping pre-commit checks.")
-        exit(0)
-
-    with open(commit_msg_file, "r") as f:
-        commit_message = f.read().strip()
-
     # Get the author information from git config
     author_name = subprocess.check_output(
         ["git", "config", "user.name"], universal_newlines=True
@@ -46,7 +33,6 @@ def get_commit_info():
     timestamp = datetime.now().timestamp()
 
     return (
-        commit_message,
         author_name,
         author_email,
         timestamp,
@@ -58,12 +44,19 @@ def get_commit_info():
 
 def get_code_diff():
     """
-    Get the code diff of the committed changes.
+    Get the code diff of the committed changes, limited to 1000 lines.
     """
     diff = subprocess.check_output(
         ["git", "diff", "--cached"], universal_newlines=True
     ).strip()
-    return diff
+
+    # Split into lines and limit to 1000 lines
+    diff_lines = diff.splitlines()[:1000]
+
+    if len(diff_lines) == 1000:
+        diff_lines.append("\n... (diff truncated at 1000 lines)")
+
+    return "\n".join(diff_lines)
 
 
 def save_to_database(
@@ -188,7 +181,6 @@ def main():
     code_diff = None
     # Get commit information
     (
-        commit_message,
         author_name,
         author_email,
         timestamp,
@@ -197,17 +189,15 @@ def main():
         current_branch,
     ) = get_commit_info()
 
-    # If the commit message is not 'initial commit', capture the code diff
-    code_diff = None
-    if commit_message.lower() != "initial commit":
-        code_diff = get_code_diff()
+    code_diff = get_code_diff()
+    print("Code diff captured.")
 
     # Save README file to the database and get its ID
     readme_id = save_readme_to_database()
 
     # Save commit info and code diff to the database
     save_to_database(
-        commit_message,
+        "",
         author_name,
         author_email,
         timestamp,
@@ -218,7 +208,7 @@ def main():
         readme_id,
     )
 
-    print(f"Commit {commit_message} saved to database at {DB_PATH}")
+    print(f"Commit saved to database at {DB_PATH}")
 
 
 if __name__ == "__main__":
