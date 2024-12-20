@@ -25,53 +25,21 @@ def get_commit_info():
     return commit_message
 
 
-def get_code_diff():
+def insert_commit_message(commit_message):
     """
-    Get the code diff of the committed changes.
-    """
-    diff = subprocess.check_output(
-        ["git", "diff", "--cached"], universal_newlines=True
-    ).strip()
-    return diff
-
-
-def save_to_database(
-    commit_message,
-    author_name,
-    author_email,
-    timestamp,
-    repo_url,
-    repo_name,
-    current_branch,
-    code_diff=None,
-    readme_id=None,
-):
-    """
-    Save the commit information and code diff to the SQLite database.
+    Update the latest record in the commits table with the commit message.
     """
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
-    # Insert the commit information
+    # Update the most recent record (highest ID) with the commit message
     cursor.execute(
         """
-                INSERT INTO commits (
-                    timestamp, author_name, author_email, commit_message, 
-                    repo_url, repo_name, branch_name, code_diff, readme_id
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-        (
-            timestamp,
-            author_name,
-            author_email,
-            commit_message,
-            repo_url,
-            repo_name,
-            current_branch,
-            code_diff,
-            readme_id,
-        ),
+        UPDATE commits 
+        SET commit_message = ?
+        WHERE id = (SELECT MAX(id) FROM commits)
+        """,
+        (commit_message,),
     )
 
     conn.commit()
