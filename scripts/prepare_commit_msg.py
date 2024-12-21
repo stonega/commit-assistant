@@ -3,7 +3,6 @@
 from google import genai
 import subprocess
 import os
-from datetime import datetime
 
 
 def get_code_diff():
@@ -76,7 +75,6 @@ def main():
     print("------------------------")
     print(commit_message)
     print("------------------------")
-
     # Ask for confirmation
     response = input("\nWould you like to use this commit message? (y/n): ").lower()
     if response == "y":
@@ -87,15 +85,14 @@ def main():
                 f.write(commit_message)
 
             # Allow user to edit the message
-            editor = os.getenv("EDITOR", "vim")
-            subprocess.call([editor, temp_file])
+            subprocess.call(["vim", temp_file])
 
             # Read the possibly modified message
             with open(temp_file, "r") as f:
                 final_message = f.read()
 
             # Commit with the message
-            subprocess.run(["git", "commit", "-F", temp_file], check=True)
+            subprocess.run(["git", "commit", "-m", final_message], check=True)
             print("Commit successful!")
         except Exception as e:
             print(f"Error creating commit: {str(e)}")
