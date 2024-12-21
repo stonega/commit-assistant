@@ -38,7 +38,7 @@ def generate_commit_message(diff):
     2. Keep the first line under 50 characters
     3. Use the imperative mood ("add" not "added")
     4. Focus on the "what" and "why", not the "how"
-    5. If needed, add detailed explanation after a blank line
+    5. Return as plain text
 
     Here are the code changes:
 
@@ -76,28 +76,48 @@ def main():
     print(commit_message)
     print("------------------------")
     # Ask for confirmation
-    response = input("\nWould you like to use this commit message? (y/n): ").lower()
-    if response == "y":
-        try:
+    while True:
+        response = input(
+            "\nWould you like to (y)use this message, (e)edit it, or (n)cancel? (y/e/n): "
+        ).lower()
+        if response in ["y", "e", "n"]:
+            break
+        print("Invalid option. Please choose y, e, or n.")
+
+    temp_file = ".git/COMMIT_EDITMSG"
+    try:
+        if response in ["y", "e"]:
             # Write commit message to temporary file
-            temp_file = ".git/COMMIT_EDITMSG"
             with open(temp_file, "w") as f:
                 f.write(commit_message)
 
-            # Allow user to edit the message
-            subprocess.call(["vim", temp_file])
+            if response == "e":
+                # Allow user to edit the message
+                subprocess.call(["vim", temp_file])
+                print("\nEdited commit message:")
+                print("------------------------")
+                with open(temp_file, "r") as f:
+                    edited_message = f.read()
+                print(edited_message)
+                print("------------------------")
 
-            # Read the possibly modified message
+                # Confirm after editing
+                use_edited = input("\nUse this edited message? (y/n): ").lower()
+                if use_edited != "y":
+                    print("Commit cancelled.")
+                    return
+
+            # Read the final message
             with open(temp_file, "r") as f:
                 final_message = f.read()
 
             # Commit with the message
             subprocess.run(["git", "commit", "-m", final_message], check=True)
             print("Commit successful!")
-        except Exception as e:
-            print(f"Error creating commit: {str(e)}")
-    else:
-        print("Commit cancelled.")
+        else:
+            print("Commit cancelled.")
+    except Exception as e:
+        print(f"Error creating commit: {str(e)}")
 
 
 if __name__ == "__main__":
