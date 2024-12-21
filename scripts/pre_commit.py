@@ -40,9 +40,13 @@ def get_commit_info():
     else:
         repo_name = path_parts[-1]
 
-    current_branch = subprocess.check_output(
-        ["git", "rev-parse", "--abbrev-ref", "HEAD"], universal_newlines=True
-    ).strip()
+    try:
+        current_branch = subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"], universal_newlines=True
+        ).strip()
+    except subprocess.CalledProcessError:
+        print("Warning: Could not detect current branch, defaulting to 'main'")
+        current_branch = "main"
 
     timestamp = datetime.now().timestamp()
 

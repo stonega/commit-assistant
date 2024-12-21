@@ -1,3 +1,3 @@
 #!/bin/sh
 
-cp scripts/* ~/.local/share/commit-saver/
+cp -R ./scripts/* ~/.local/share/commit-saver/
