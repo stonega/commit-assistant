@@ -1,14 +1,29 @@
 import sqlite3
+
 import os
 
-DB_PATH = os.getenv("COMMIT_DB_PATH", "./database/commits.db")
+# Set fixed path in user's home directory
+DB_PATH = os.path.join(
+    os.path.expanduser("~"), ".config", "commit-assistant", "commits.db"
+)
 
 
 def create_db():
-    # Backup existing database if it exists
+    # Create directory structure if it doesn't exist
+    db_dir = os.path.dirname(DB_PATH)
+    os.makedirs(db_dir, exist_ok=True)
+
     if os.path.exists(DB_PATH):
         backup_path = DB_PATH.replace(".db", "_backup.db")
-        os.rename(DB_PATH, backup_path)
+        response = input(
+            f"Database already exists at {DB_PATH}. Backup and create new? (y/N): "
+        )
+
+        if response.lower() == "y":
+            os.rename(DB_PATH, backup_path)
+            print(f"Existing database backed up to: {backup_path}")
+        else:
+            raise SystemExit("Database creation cancelled by user.")
         print(f"Existing database backed up to: {backup_path}")
 
     conn = sqlite3.connect(DB_PATH)
@@ -34,7 +49,3 @@ def create_db():
     conn.commit()
     conn.close()
     print("Database and tables created!")
-
-
-if __name__ == "__main__":
-    create_db()

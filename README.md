@@ -4,5 +4,18 @@ This project tracks Git commits and README file versions by saving them to an SQ
 
 ## Features
 - Generate commit message with Gemini.
-- Tracks commit metadata (author, timestamp, message, code diff).
-- Tracks and saves README file content for every commit.
+- Save commit metadata (author, timestamp, message, code diff) in SQLite.
+- Generate commit summary with Gemini.
+
+## Usage
+
+```bash
+## setup 
+coas setup
+## setup husky hooks, run inside you project directory if husky enabled
+coas setup-husky
+## generate commit message with Gemini
+coas commit
+## summary commits for latest week
+coas summary
+```

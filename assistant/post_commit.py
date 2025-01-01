@@ -1,13 +1,7 @@
-#!/usr/bin/env python3
 import os
 import sqlite3
 import subprocess
-
-
-DB_PATH = os.getenv("COMMIT_DB_PATH", "./database/commits.db")
-# Configure Gemini API
-
-DB_PATH = os.getenv("COMMIT_DB_PATH", "./database/commits.db")
+from .setup_db import DB_PATH
 
 
 def get_commit_info():
@@ -48,7 +42,7 @@ def insert_commit_message(commit_message):
     conn.close()
 
 
-def main():
+def save_commit_message():
     if not os.path.exists(DB_PATH):
         print(f"Error: Database not found at {DB_PATH}. Please initialize it first.")
         exit(1)
@@ -58,7 +52,3 @@ def main():
 
     insert_commit_message(commit_message)
     print(f"Commit {commit_message} saved to database at {DB_PATH}")
-
-
-if __name__ == "__main__":
-    main()

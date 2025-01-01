@@ -1,4 +1,0 @@
-#!/bin/bash
-
-echo "Running global pre-commit hook..."
-python3 ~/.local/share/commit-saver/pre_commit.py

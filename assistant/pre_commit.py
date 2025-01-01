@@ -4,8 +4,7 @@ import os
 import sqlite3
 import subprocess
 from datetime import datetime
-
-DB_PATH = os.getenv("COMMIT_DB_PATH", "./database/commits.db")
+from .setup_db import DB_PATH
 
 
 def get_commit_info():
@@ -132,7 +131,7 @@ def save_to_database(
     conn.close()
 
 
-def main():
+def save_commit_diff():
     if not os.path.exists(DB_PATH):
         print(f"Error: Database not found at {DB_PATH}. Please initialize it first.")
         exit(1)
@@ -167,7 +166,3 @@ def main():
     )
 
     print(f"Commit saved to database at {DB_PATH}")
-
-
-if __name__ == "__main__":
-    main()

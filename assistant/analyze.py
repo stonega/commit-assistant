@@ -1,9 +1,8 @@
 import sqlite3
 from datetime import datetime, timedelta
 from google import genai
-import os
-
-DB_PATH = os.getenv("COMMIT_DB_PATH", "./database/commits.db")
+from .setup_db import DB_PATH
+from .config import config
 
 
 # Step 1: Get commits for the current week
@@ -55,7 +54,8 @@ def summarize_commits_with_gemini(commit_summary):
         return "No commits were made this week."
 
     # Create Gemini model instance
-    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+    api_key = config.get("gemini", "api_key")
+    client = genai.Client(api_key=api_key)
 
     prompt = f"""
     Below is the list of Git commits made this week. Summarize the work done by repo during the week:
@@ -73,7 +73,7 @@ def summarize_commits_with_gemini(commit_summary):
 
 
 # Step 4: Main script
-def main():
+def summarize_week_commit():
     commits = get_commits_for_current_week(DB_PATH)
 
     # Format the commits
@@ -83,7 +83,3 @@ def main():
     # Get the summary from OpenAI
     summary = summarize_commits_with_gemini(commit_summary)
     print("\nWeekly Summary:\n", summary)
-
-
-if __name__ == "__main__":
-    main()

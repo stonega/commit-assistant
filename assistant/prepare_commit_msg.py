@@ -55,7 +55,7 @@ def generate_commit_message(diff):
         return None
 
 
-def main():
+def prepare_commit_msg():
     """
     Main function to generate and apply commit message.
     """
@@ -121,4 +121,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    prepare_commit_msg()
