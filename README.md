@@ -9,6 +9,13 @@ This project tracks Git commits and README file versions by saving them to an SQ
 - Save commit metadata (author, timestamp, message, code diff) in SQLite.
 - Generate commit summary with Gemini.
 
+## Installation
+
+```bash
+pip install commit-assistant
+```
+
+```
 ## Usage
 
 ```bash
