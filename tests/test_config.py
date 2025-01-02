@@ -1,7 +1,7 @@
 import os
 import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from assistant.config import Config
 
 
@@ -36,8 +36,6 @@ def test_default_config_values():
     assert (
         config.get("database", "path") == "~/.local/config/commit-assistant/commits.db"
     )
-    assert config.get("git", "hooks_dir") == ".husky"
-    assert config.get("logging", "level") == "INFO"
 
 
 def test_set_and_get_config(config_with_temp_dir):

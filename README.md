@@ -1,5 +1,7 @@
 # Commit Assistant
 
+[![PyPI version](https://badge.fury.io/py/commit-assistant.svg)](https://badge.fury.io/py/commit-assistant)
+
 This project tracks Git commits and README file versions by saving them to an SQLite database using a post-commit hook.
 
 ## Features
