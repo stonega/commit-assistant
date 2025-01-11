@@ -22,7 +22,7 @@ class Config:
         print("\nGemini API Setup")
         print("----------------")
         print("You need a Gemini API key to use this tool.")
-        print("Get your API key from: https://makersuite.google.com/app/apikey\n")
+        print("Get your API key from: https://aistudio.google.com/apikey\n")
 
         api_key = input("Please enter your Gemini API key: ").strip()
 

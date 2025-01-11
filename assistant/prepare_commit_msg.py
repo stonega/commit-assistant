@@ -2,7 +2,7 @@
 
 from google import genai
 import subprocess
-import os
+from .config import config
 
 
 def get_code_diff():
@@ -29,7 +29,8 @@ def generate_commit_message(diff):
         return None
 
     # Create Gemini model instance
-    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+    api_key = config.get("gemini", "api_key")
+    client = genai.Client(api_key=api_key)
 
     prompt = f"""
     As a Git commit message generator, analyze the following code changes and create a clear, 
@@ -76,16 +77,16 @@ def prepare_commit_msg():
     print(commit_message)
     print("------------------------")
     # Ask for confirmation
-    while True:
-        response = input(
-            "\nWould you like to (y)use this message, (e)edit it, or (n)cancel? (y/e/n): "
-        ).lower()
-        if response in ["y", "e", "n"]:
-            break
-        print("Invalid option. Please choose y, e, or n.")
-
-    temp_file = ".git/COMMIT_EDITMSG"
     try:
+        while True:
+            response = input(
+                "\nWould you like to (y)use this message, (e)edit it, or (n)cancel? (y/e/n): "
+            ).lower()
+            if response in ["y", "e", "n"]:
+                break
+            print("Invalid option. Please choose y, e, or n.")
+
+        temp_file = ".git/COMMIT_EDITMSG"
         if response in ["y", "e"]:
             # Write commit message to temporary file
             with open(temp_file, "w") as f:
@@ -116,6 +117,9 @@ def prepare_commit_msg():
             print("Commit successful!")
         else:
             print("Commit cancelled.")
+    except KeyboardInterrupt:
+        print("\nOperation cancelled by user.")
+        return
     except Exception as e:
         print(f"Error creating commit: {str(e)}")
 

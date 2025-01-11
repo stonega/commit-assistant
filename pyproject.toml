@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "commit-assistant"
-version = "0.1.0"
+version = "0.1.1"
 authors = [{ name = "Stone", email = "xijieyin@gmail.com" }]
 description = "An AI commit assistant CLI tool."
 readme = "README.md"
@@ -14,6 +14,7 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
 ]
+dependencies = ["google-genai", "rich"]
 
 [project.scripts]
 coas = "assistant.cli:cli"
